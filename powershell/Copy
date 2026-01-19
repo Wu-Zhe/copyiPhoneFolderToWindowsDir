@@ -1,0 +1,64 @@
+Write-Host "--- Starting File Transfer: iPhone -> D:\dest ---" -ForegroundColor Cyan
+
+$shell = New-Object -ComObject Shell.Application
+$thisPC = $shell.NameSpace(17)
+$destinationPath = "D:\dest"
+
+# 1. Prepare Destination Folder
+if (-not (Test-Path $destinationPath)) {
+    New-Item -ItemType Directory -Path $destinationPath | Out-Null
+    Write-Host "[OK] Created destination: $destinationPath"
+}
+$destFolder = $shell.NameSpace($destinationPath)
+
+# 2. Find the iPhone
+$iphone = $thisPC.Items() | Where-Object { $_.Name -match "iPhone" }
+if (-not $iphone) { 
+    Write-Host "[!] ERROR: iPhone not found. Please unlock and re-plug." -ForegroundColor Red
+    return 
+}
+
+# 3. Drill down to the Source Folder (202506_a)
+# We search for Internal Storage, then look for 202506_a inside it
+$storage = $iphone.GetFolder.Items() | Where-Object { $_.Name -match "Storage" -or $_.Name -match "Internal" }
+$source = $storage.GetFolder.Items() | Where-Object { $_.Name -eq "202506_a" }
+
+if (-not $source) {
+    Write-Host "[!] ERROR: Source folder '202506_a' not found." -ForegroundColor Red
+    return
+}
+
+# 4. Iterate and Copy Files
+Write-Host "> Found $($source.GetFolder.Items().Count) items. Starting copy..." -ForegroundColor Yellow
+$success = 0
+$failed = 0
+
+foreach ($file in $source.GetFolder.Items()) {
+    try {
+        if ($file.IsFolder) { continue } # Skip subfolders
+
+        # --- LOGIC TO IGNORE COPIED FILES ---
+        $targetFile = Join-Path $destinationPath $file.Name
+        if (Test-Path $targetFile) {
+            Write-Host "Skipping: $($file.Name) (Already exists)" -ForegroundColor Gray
+            $skipped++
+            continue # Move to the next file
+        }
+        # ------------------------------------
+
+        Write-Host "Copying: $($file.Name)..." -NoNewline
+        $destFolder.CopyHere($file, 16)
+        Write-Host " [DONE]" -ForegroundColor Green
+        $success++
+    }
+    catch {
+        Write-Host " [FAILED]" -ForegroundColor Red
+        $failed++
+    }
+}
+
+Write-Host "`n--- Summary ---" -ForegroundColor Cyan
+Write-Host "Successfully Copied: $success"
+Write-Host "Errors/Skipped: $failed"
+
+
