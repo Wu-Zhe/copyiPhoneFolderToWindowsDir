@@ -6,7 +6,9 @@ This tool allows one to copy iPhone folder to an existing Windows directory
 **Motivation**: When an iPhone is connected to a Windows machine via USB, using File Explorer to transfer images often proves unreliable. Bulk copy operations within the iPhone's photo directories frequently fail, necessitating a more robust programmatic solution
 
 **Usage:**
-    PowerShell
+
+    Download SyncIPhoneFolder.ps1
+    From Windows, open PowerShell and run the following command.
 
     .\SyncIPhoneFolder.ps1 -SourceFolderName "202506_a"
     
