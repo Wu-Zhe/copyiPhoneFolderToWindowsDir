@@ -53,9 +53,13 @@ The Check: It verifies if the file already exists in D:\dest before starting.
 The Shield: If a specific file fails (due to a timeout or the phone momentarily locking), the Catch block captures the error, logs it, and the Continue command immediately triggers the next file in the loop. This prevents a single bad file from "killing" the entire backup process.
 
 **Configuration on Windows**
+
+
 To avoid hitting error messages like "...cannot be loaded because running scripts is disabled on this system ...", right-click the PowerShell icon and select Run as Administrator.
 
 Type the following and press Enter:
+
     PowerShell
+    
     Set-ExecutionPolicy RemoteSigned
 Type Y when prompted.
